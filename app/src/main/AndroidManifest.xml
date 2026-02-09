@@ -13,6 +13,8 @@
         android:label="EventQR"
         android:supportsRtl="true"
         android:theme="@style/Theme.EventQR"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         tools:ignore="MissingClass">
         <activity
             android:name=".MainActivity"

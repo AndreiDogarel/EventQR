@@ -27,10 +27,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.eventqr.ui.components.AppScaffold
+import com.example.eventqr.ui.components.BackButton
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
+import com.example.eventqr.ui.components.AppScaffold
+import com.example.eventqr.ui.components.BackButton
+
 
 @Composable
 fun ScanScreen(
@@ -44,6 +51,18 @@ fun ScanScreen(
     val hasPermission = remember { mutableStateOf(false) }
     val lastScanned = remember { mutableStateOf("") }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(lastAction.value) {
+        val msg = when (lastAction.value) {
+            "Saved" -> "Saved"
+            "Duplicate" -> "Duplicate"
+            "Invalid QR" -> "Invalid QR"
+            else -> ""
+        }
+        if (msg.isNotBlank()) snackbarHostState.showSnackbar(msg)
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted -> hasPermission.value = granted }
@@ -53,30 +72,28 @@ fun ScanScreen(
         permissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
-    Column(modifier = Modifier.padding(24.dp)) {
-        Text("Scan QR")
-        Text("Last: ${lastAction.value}")
-
-        Button(
-            onClick = onBack,
-            modifier = Modifier.padding(top = 12.dp)
-        ) {
-            Text("Back")
-        }
-
-        if (hasPermission.value) {
-            CameraPreview(
-                context = context,
-                lifecycleOwner = lifecycleOwner,
-                onQr = { raw ->
-                    if (raw.isBlank()) return@CameraPreview
-                    if (raw == lastScanned.value) return@CameraPreview
-                    lastScanned.value = raw
-                    vm.onQrScanned(raw)
-                }
-            )
-        } else {
-            Text("Camera permission required")
+    AppScaffold(
+        title = "Scan",
+        navigation = { BackButton(onBack) },
+        actions = null,
+        snackbarHostState = snackbarHostState,
+        floatingActionButton = null
+    ) { padding ->
+        Column(modifier = Modifier.padding(padding).padding(20.dp)) {
+            if (hasPermission.value) {
+                CameraPreview(
+                    context = context,
+                    lifecycleOwner = lifecycleOwner,
+                    onQr = { raw ->
+                        if (raw.isBlank()) return@CameraPreview
+                        if (raw == lastScanned.value) return@CameraPreview
+                        lastScanned.value = raw
+                        vm.onQrScanned(raw)
+                    }
+                )
+            } else {
+                Text("Camera permission required")
+            }
         }
     }
 }
