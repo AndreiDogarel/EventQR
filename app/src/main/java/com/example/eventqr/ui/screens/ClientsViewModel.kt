@@ -81,4 +81,8 @@ class ClientsViewModel @Inject constructor(
             _lastAction.value = if (inserted) "Saved" else "Duplicate"
         }
     }
+
+    fun clearLastAction() {
+        _lastAction.value = ""
+    }
 }

@@ -59,6 +59,7 @@ dependencies {
 
     implementation("androidx.room:room-runtime:2.8.4")
     implementation("androidx.room:room-ktx:2.8.4")
+    implementation(libs.androidx.compose.ui.geometry)
     ksp("androidx.room:room-compiler:2.8.4")
 
     implementation("com.google.dagger:hilt-android:2.59.1")
