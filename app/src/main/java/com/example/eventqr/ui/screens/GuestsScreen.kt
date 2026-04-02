@@ -28,6 +28,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
 
 
 
@@ -61,22 +75,25 @@ fun GuestsScreen(
             }
 
             Row(modifier = Modifier.padding(top = 16.dp)) {
-                TypeChip(
+                FilterChip(
                     text = "All",
                     selected = typeFilter.value == null,
                     onClick = { vm.setTypeFilter(null) }
                 )
-                TypeChip(
+                Spacer(modifier = Modifier.width(10.dp))
+                FilterChip(
                     text = "DCS",
                     selected = typeFilter.value == ClientType.DCS_EMPLOYEE,
                     onClick = { vm.setTypeFilter(ClientType.DCS_EMPLOYEE) }
                 )
-                TypeChip(
+                Spacer(modifier = Modifier.width(10.dp))
+                FilterChip(
                     text = "Vendors",
                     selected = typeFilter.value == ClientType.VENDOR_PARTNER,
                     onClick = { vm.setTypeFilter(ClientType.VENDOR_PARTNER) }
                 )
-                TypeChip(
+                Spacer(modifier = Modifier.width(10.dp))
+                FilterChip(
                     text = "Clients",
                     selected = typeFilter.value == ClientType.DCS_CLIENT,
                     onClick = { vm.setTypeFilter(ClientType.DCS_CLIENT) }
@@ -108,16 +125,49 @@ fun GuestsScreen(
 }
 
 @Composable
-private fun TypeChip(
+private fun FilterChip(
     text: String,
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    TextButton(
-        onClick = onClick,
-        modifier = Modifier.padding(end = 8.dp)
+    val scheme = MaterialTheme.colorScheme
+
+    val bg by animateColorAsState(
+        targetValue = if (selected) scheme.primary else scheme.surface,
+        animationSpec = tween(180),
+        label = "chipBg"
+    )
+
+    val fg by animateColorAsState(
+        targetValue = if (selected) scheme.onPrimary else scheme.onSurface,
+        animationSpec = tween(180),
+        label = "chipFg"
+    )
+
+    val borderColor by animateColorAsState(
+        targetValue = if (selected) scheme.primary else scheme.surfaceVariant,
+        animationSpec = tween(180),
+        label = "chipBorder"
+    )
+
+    Surface(
+        color = bg,
+        contentColor = fg,
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, borderColor),
+        modifier = Modifier
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) { onClick() }
+            .animateContentSize(animationSpec = tween(180))
     ) {
-        Text(if (selected) "[$text]" else text)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+        )
     }
 }
 
